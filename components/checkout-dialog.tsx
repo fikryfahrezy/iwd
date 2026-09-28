@@ -11,6 +11,10 @@ import {
 } from "@/lib/catalog";
 import { ArrowRightIcon, CheckIcon, CloseIcon, TruckIcon } from "./icons";
 import { Scene } from "./scene";
+import { Button, IconButton } from "@/components/ui/button";
+import { Price } from "@/components/ui/price";
+import { focusRingWithin, selectable } from "@/components/ui/styles";
+import { cn } from "@/lib/utils";
 
 function deliveryDate() {
   const d = new Date();
@@ -81,7 +85,7 @@ export function CheckoutDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
       <div
-        className="fade-in absolute inset-0 bg-ink/40 backdrop-blur-[2px]"
+        className="fade-in absolute inset-0 bg-ink/30 backdrop-blur-[2px]"
         onClick={onClose}
       />
       <div
@@ -89,74 +93,57 @@ export function CheckoutDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="checkout-title"
-        className="sheet-in relative flex max-h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl bg-surface shadow-2xl sm:rounded-3xl"
+        className="sheet-in relative flex max-h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl bg-surface shadow-2xl ring-1 ring-black/5 sm:rounded-2xl"
       >
-        <div className="flex items-center justify-between border-b border-line px-5 py-4 sm:px-6">
-          <h2 id="checkout-title" className="text-lg font-semibold">
+        <div className="flex items-center justify-between border-b border-line px-5 py-3.5 sm:px-6">
+          <h2 id="checkout-title" className="text-base font-semibold">
             {order ? "You're all set" : "Review your setup"}
           </h2>
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="grid size-9 place-items-center rounded-full text-muted transition hover:bg-canvas hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
-          >
+          <IconButton ref={closeRef} label="Close" onClick={onClose}>
             <CloseIcon className="size-5" />
-          </button>
+          </IconButton>
         </div>
 
         {order ? (
           <div className="overflow-y-auto px-5 py-8 text-center sm:px-10">
-            <div className="mx-auto grid size-14 place-items-center rounded-full bg-brand text-white">
-              <CheckIcon className="size-7" />
+            <div className="mx-auto grid size-12 place-items-center rounded-full bg-brand-soft text-brand">
+              <CheckIcon className="size-6" />
             </div>
-            <p className="mt-4 text-2xl font-semibold tracking-tight">
+            <p className="mt-4 text-xl font-semibold tracking-tight">
               Your workspace is booked!
             </p>
-            <p className="mx-auto mt-2 max-w-md text-muted">
+            <p className="mx-auto mt-1.5 max-w-md text-[15px] text-muted">
               We&apos;ll deliver and set everything up on{" "}
-              <span className="font-semibold text-ink">{order.date}</span>.
-              Order{" "}
-              <span className="font-mono font-semibold text-ink">
-                {order.id}
-              </span>
+              <span className="font-medium text-ink">{order.date}</span>. Order{" "}
+              <span className="font-mono font-medium text-ink">{order.id}</span>
               .
             </p>
-            <div className="mx-auto mt-6 max-w-md overflow-hidden rounded-2xl border border-line">
+            <div className="mx-auto mt-6 max-w-md overflow-hidden rounded-xl border border-line">
               <Scene selection={selection} className="scene block w-full" />
             </div>
             <p className="mt-4 text-sm text-muted">
               {duration.label} · {formatUsd(total)} total
             </p>
             <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
-              <button
-                type="button"
-                onClick={onStartOver}
-                className="rounded-full border border-line px-5 py-3 font-semibold transition hover:bg-canvas focus-visible:outline-2 focus-visible:outline-brand"
-              >
+              <Button size="lg" onClick={onStartOver}>
                 Design another setup
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-full bg-ink px-5 py-3 font-semibold text-white transition hover:bg-ink/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-              >
+              </Button>
+              <Button variant="dark" size="lg" onClick={onClose}>
                 Done
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
           <>
             <div className="grid overflow-y-auto sm:grid-cols-[1.1fr_1fr]">
-              <div className="border-b border-line bg-canvas p-5 sm:border-r sm:border-b-0 sm:p-6">
-                <div className="overflow-hidden rounded-2xl">
+              <div className="border-b border-line bg-subtle/60 p-5 sm:border-r sm:border-b-0 sm:p-6">
+                <div className="overflow-hidden rounded-xl border border-line">
                   <Scene selection={selection} className="scene block w-full" />
                 </div>
-                <div className="mt-4 flex items-start gap-3 rounded-2xl bg-surface p-4 text-sm">
+                <div className="mt-4 flex items-start gap-3 rounded-xl border border-line bg-surface p-3.5 text-sm">
                   <TruckIcon className="mt-0.5 size-5 shrink-0 text-brand" />
                   <p>
-                    <span className="font-semibold">
+                    <span className="font-medium">
                       Delivered &amp; set up {deliveryDate()}
                     </span>
                     <span className="block text-muted">
@@ -165,20 +152,23 @@ export function CheckoutDialog({
                   </p>
                 </div>
                 <fieldset className="mt-5">
-                  <legend className="text-sm font-semibold">
+                  <legend className="text-sm font-medium">
                     How long do you need it?
                   </legend>
-                  <div className="mt-2 grid grid-cols-4 gap-1.5 sm:grid-cols-2 sm:gap-2">
+                  <div className="mt-2 grid grid-cols-4 gap-1.5 sm:grid-cols-2">
                     {DURATIONS.map((d) => {
                       const active = d.id === durationId;
                       return (
                         <label
                           key={d.id}
-                          className={`relative cursor-pointer rounded-xl border px-1 py-2 text-center text-[13px] sm:text-sm transition has-focus-visible:outline-2 has-focus-visible:outline-brand ${
+                          className={cn(
+                            "cursor-pointer rounded-lg bg-surface px-1 py-2 text-center text-[13px] sm:text-sm",
+                            selectable(active),
+                            focusRingWithin,
                             active
-                              ? "border-brand bg-brand-soft font-semibold text-brand-strong"
-                              : "border-line hover:border-muted/50"
-                          }`}
+                              ? "font-medium text-ink"
+                              : "text-muted hover:text-ink",
+                          )}
                         >
                           <input
                             type="radio"
@@ -190,7 +180,7 @@ export function CheckoutDialog({
                           />
                           {d.label}
                           {d.discount > 0 && (
-                            <span className="block text-[11px] font-semibold text-coral">
+                            <span className="block text-[11px] font-medium text-brand">
                               −{Math.round(d.discount * 100)}%
                             </span>
                           )}
@@ -209,7 +199,7 @@ export function CheckoutDialog({
                       className="flex items-baseline justify-between gap-3 py-2"
                     >
                       <span className="min-w-0">
-                        <span className="font-medium">
+                        <span className="text-[15px]">
                           {l.qty > 1 && (
                             <span className="text-muted">{l.qty}× </span>
                           )}
@@ -221,10 +211,10 @@ export function CheckoutDialog({
                           </span>
                         )}
                       </span>
-                      <span className="shrink-0 text-sm tabular-nums">
-                        {formatUsd(l.pricePerWeek * l.qty)}
-                        <span className="text-muted">/wk</span>
-                      </span>
+                      <Price
+                        value={l.pricePerWeek * l.qty}
+                        className="shrink-0"
+                      />
                     </li>
                   ))}
                 </ul>
@@ -238,7 +228,7 @@ export function CheckoutDialog({
                     <dd className="tabular-nums">{formatUsd(subtotal)}</dd>
                   </div>
                   {discount > 0 && (
-                    <div className="flex justify-between text-coral">
+                    <div className="flex justify-between text-brand">
                       <dt>Long-stay discount</dt>
                       <dd className="tabular-nums">−{formatUsd(discount)}</dd>
                     </div>
@@ -248,8 +238,8 @@ export function CheckoutDialog({
                     <dd>Free</dd>
                   </div>
                   <div className="flex items-baseline justify-between border-t border-line pt-3 text-base">
-                    <dt className="font-semibold">Total</dt>
-                    <dd className="text-2xl font-semibold tabular-nums">
+                    <dt className="font-medium">Total</dt>
+                    <dd className="text-2xl font-semibold tracking-tight tabular-nums">
                       {formatUsd(total)}
                     </dd>
                   </div>
@@ -258,23 +248,19 @@ export function CheckoutDialog({
             </div>
 
             <div className="flex flex-col-reverse gap-2 border-t border-line px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-6">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-full px-5 py-3 font-semibold text-muted transition hover:bg-canvas hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
-              >
+              <Button variant="ghost" size="lg" onClick={onClose}>
                 Keep designing
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="primary"
+                size="lg"
                 onClick={() =>
                   setOrder({ id: orderNumber(), date: deliveryDate() })
                 }
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                iconEnd={<ArrowRightIcon />}
               >
                 Rent this setup · {formatUsd(total)}
-                <ArrowRightIcon />
-              </button>
+              </Button>
             </div>
           </>
         )}

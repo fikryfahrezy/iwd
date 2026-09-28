@@ -87,14 +87,7 @@ function Backdrop() {
           <rect x={78} y={62} width={176} height={156} rx={6} />
         </clipPath>
       </defs>
-      <rect
-        x={24}
-        y={16}
-        width={952}
-        height={520}
-        rx={32}
-        fill={`url(#wall${id})`}
-      />
+      <rect x={0} y={0} width={1000} height={620} fill={`url(#wall${id})`} />
       {/* window with an ocean view */}
       <rect
         x={70}
