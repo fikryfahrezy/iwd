@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@theme {
+  --color-canvas: #f7f3ec;
+  --color-surface: #ffffff;
+  --color-ink: #1f1d1a;
+  --color-muted: #6f6a62;
+  --color-line: #e6dfd3;
+  --color-brand: #1f7a6c;
+  --color-brand-strong: #17645a;
+  --color-brand-soft: #e3f1ee;
+  --color-coral: #e76f51;
+}
+
+:root {
+  color-scheme: light;
+  --scene-wall-top: #fbf8f3;
+  --scene-wall: #f1eadf;
+  --scene-trim: #ffffff;
+  --scene-floor: #e9dcc7;
+  --scene-floor-edge: #d6c4a8;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+/* Items drop into the scene when they're added. */
+.pop-in {
+  animation: pop-in 460ms cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-22px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Standing desk lift. */
+.lift {
+  transition: transform 800ms cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+.fan-spin {
+  animation: spin 0.9s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.steam {
+  animation: steam 2.4s ease-in-out infinite;
+}
+
+@keyframes steam {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translateY(2px);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(-3px);
+  }
+}
+
+.scene :is(rect, path, ellipse, polygon, circle) {
+  transition: fill 300ms ease;
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.sheet-in {
+  animation: sheet-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.fade-in {
+  animation: fade-in 200ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pop-in,
+  .fan-spin,
+  .steam,
+  .sheet-in,
+  .fade-in {
+    animation: none;
+  }
+  .lift,
+  .scene :is(rect, path, ellipse, polygon, circle) {
+    transition: none;
+  }
+}

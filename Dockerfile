@@ -1,0 +1,56 @@
+# Official Bun image (Debian-based)
+# See all versions at https://hub.docker.com/r/oven/bun/tags
+FROM oven/bun:1.4.2-slim AS base
+WORKDIR /app
+
+# Install dependencies with bun
+FROM base AS deps
+COPY package.json bun.lock bunfig.toml ./
+# --ignore-scripts skips the `prepare` script (lefthook install), which needs git
+RUN bun install --frozen-lockfile --ignore-scripts
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN bun run build
+
+# Production image, copy all the files and run next
+FROM base AS runner
+
+# Install ca-certificates and curl for health checks
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates curl tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    NODE_ENV=production \
+    PORT=3000 \
+    HOSTNAME="0.0.0.0"
+
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-log-init -g nodejs nextjs
+
+COPY --from=builder /app/public ./public
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/app/api-reference/config/next-config-js/output
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE ${PORT}
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:${PORT} || exit 1
+
+CMD ["bun", "./server.js"]
